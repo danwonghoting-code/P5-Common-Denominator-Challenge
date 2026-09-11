@@ -4,35 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>異分母通分挑戰賽 (Common Denominator Challenge)</title>
+    <!-- 引入圓潤可愛的字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4CAF50;
-            --secondary: #2196F3;
-            --danger: #f44336;
-            --dark: #333;
-            --light: #f9f9f9;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            /* 糖果系色調 */
+            --candy-green: #1dd1a1;
+            --candy-blue: #48dbfb;
+            --candy-pink: #ff9ff3;
+            --candy-red: #ff6b6b;
+            --candy-yellow: #feca57;
+            --candy-purple: #5f27cd;
+            --dark: #2c3e50;
+            --light: #f5f6fa;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e0f7fa;
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* 糖果漸變背景 */
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            color: var(--dark);
         }
 
         #game-container {
             width: 95%;
-            max-width: 800px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
+            max-width: 850px;
+            /* 玻璃擬態質感 */
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
             margin: 20px 0;
-            padding: 20px;
+            padding: 30px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -43,6 +52,12 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .active { display: flex; }
@@ -51,44 +66,53 @@
         #header-stats {
             width: 100%;
             display: flex;
-            justify-content: space-between;
-            background: var(--dark);
+            justify-content: space-around;
+            background: linear-gradient(90deg, var(--candy-purple), #8395a7);
             color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 12px 20px;
+            border-radius: 16px;
             box-sizing: border-box;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
+            box-shadow: 0 4px 0 #341f97;
         }
 
         .stat-item {
-            font-size: 1.1em;
-            font-weight: bold;
+            font-size: 1.15em;
+            font-weight: 900;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
-        .stat-item span { color: #ffd700; }
+        .stat-item span { color: var(--candy-yellow); }
+        .stat-mistake span { color: var(--candy-red) !important; }
 
         /* Typography */
-        h1, h2, h3 { color: var(--dark); text-align: center; }
+        h1 { color: var(--candy-purple); text-align: center; font-size: 2.2em; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
+        h2 { color: var(--candy-blue); text-align: center; }
 
-        /* Buttons */
+        /* 3D Buttons */
         button {
-            background-color: var(--secondary);
+            background-color: var(--candy-blue);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2em;
-            border-radius: 8px;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.1s, background-color 0.3s;
-            margin-top: 20px;
-            box-shadow: 0 4px #0b7dda;
+            transition: all 0.1s;
+            margin-top: 25px;
+            box-shadow: 0 6px 0 #0abde3;
+            font-family: inherit;
         }
         button:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 transparent;
+            transform: translateY(6px);
+            box-shadow: 0 0 0 transparent;
         }
-        button.btn-primary { background-color: var(--primary); box-shadow: 0 4px #388E3C; }
+        button.btn-primary { 
+            background-color: var(--candy-pink); 
+            box-shadow: 0 6px 0 #f368e0; 
+        }
 
         /* Fraction Display & Inputs */
         .question-area {
@@ -99,7 +123,7 @@
             margin: 20px 0;
         }
         
-        @media (min-width: 600px) {
+        @media (min-width: 650px) {
             .question-area {
                 flex-direction: row;
                 justify-content: space-evenly;
@@ -110,63 +134,116 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: var(--light);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-            min-width: 200px;
+            background: #f1f2f6;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.05), 0 4px 0px #dfe4ea;
+            flex: 1;
+            margin: 0 10px;
         }
 
-        .fraction-display {
-            display: flex;
+        /* 標準分數排版樣式 (用於展示與結算表) */
+        .frac-inline {
+            display: inline-flex;
             align-items: center;
-            font-size: 2em;
-            margin-bottom: 15px;
+            vertical-align: middle;
+            font-weight: bold;
+            margin: 0 4px;
         }
-
-        .int-part { margin-right: 5px; font-weight: bold; }
-        .frac-part { display: flex; flex-direction: column; align-items: center; }
-        .frac-part .num { border-bottom: 2px solid var(--dark); padding: 0 5px; }
-        .frac-part .den { padding: 0 5px; }
-
-        .arrow { font-size: 1.5em; color: #888; margin: 10px 0; }
-
-        .fraction-input-group {
-            display: flex;
-            align-items: center;
-            font-size: 1.5em;
-        }
-
-        input[type="number"] {
-            width: 60px;
-            height: 40px;
+        .frac-inline .int-part {
+            margin-right: 4px;
             font-size: 1.2em;
-            text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 6px;
-            margin: 5px 0;
         }
-        
-        .frac-input-part {
+        .frac-inline .frac-part {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .frac-input-part hr { width: 100%; border: 1px solid var(--dark); margin: 2px 0; }
+        .frac-inline .num {
+            border-bottom: 2px solid var(--dark);
+            padding: 0 4px;
+            line-height: 1.1;
+        }
+        .frac-inline .den {
+            padding: 0 4px;
+            line-height: 1.1;
+        }
+        
+        /* 題目區特大字體 */
+        .question-display .frac-inline { font-size: 2em; color: var(--candy-purple); }
 
-        /* Table */
+        .arrow { font-size: 1.5em; color: #a4b0be; margin: 15px 0; font-weight: bold; }
+
+        /* 3D 輸入框 */
+        .fraction-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="number"] {
+            width: 65px;
+            height: 50px;
+            font-size: 1.4em;
+            font-family: inherit;
+            font-weight: bold;
+            color: var(--candy-purple);
+            text-align: center;
+            border: 3px solid #dcdde1;
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        input[type="number"]:focus {
+            border-color: var(--candy-blue);
+            box-shadow: inset 0 0 0 transparent, 0 0 10px rgba(72,219,251,0.4);
+            outline: none;
+        }
+        /* 隱藏原生箭頭 */
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .input-int {
+            width: 60px !important;
+            background-color: #fff9c4 !important;
+        }
+
+        .frac-input-part {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .frac-input-part hr { 
+            width: 100%; 
+            border: 2px solid var(--dark); 
+            margin: 2px 0; 
+            border-radius: 2px;
+        }
+
+        /* 結算表格 */
+        .table-container { width:100%; overflow-x:auto; border-radius: 12px; }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 0.9em;
+            margin-top: 15px;
+            background: white;
         }
-        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-        th { background-color: var(--secondary); color: white; }
-        .correct-text { color: green; font-weight: bold; }
-        .wrong-text { color: red; font-weight: bold; }
+        th, td { border: 1px solid #dcdde1; padding: 12px; text-align: center; }
+        th { background: var(--candy-purple); color: white; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        
+        .correct-text { color: var(--candy-green); font-weight: bold; font-size: 1.1em; }
+        .wrong-text { color: var(--candy-red); font-weight: bold; font-size: 1.1em; }
 
-        #feedback-msg { font-size: 1.3em; font-weight: bold; height: 30px; margin-top: 10px; }
+        #feedback-msg { 
+            font-size: 1.4em; 
+            font-weight: 900; 
+            height: 35px; 
+            margin-top: 15px; 
+            text-align: center;
+            transition: color 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -176,13 +253,13 @@
     <!-- 標題畫面 -->
     <div id="screen-start" class="screen active">
         <h1>🚀 異分母通分挑戰賽 🚀</h1>
-        <p>歡迎來到通分挑戰！請找出分母的最小公倍數（L.C.M.）來通分。</p>
-        <ul style="text-align:left; line-height:1.8;">
-            <li><strong>難度一：</strong> 兩個真分數（共7題）</li>
-            <li><strong>難度二：</strong> 兩個帶分數（共5題）</li>
-            <li><strong>難度三：</strong> 帶分數與假分數（共5題）</li>
-            <li>答對加 20 分，連續答對加額外 5 分！</li>
-            <li><span style="color:red">注意：答錯會額外增加一題！</span></li>
+        <p style="font-size: 1.2em; color: #7f8fa6; font-weight: bold;">準備好迎接通分與最小公倍數的考驗了嗎？</p>
+        <ul style="text-align:left; line-height:2; font-size:1.1em; background: #f1f2f6; padding: 25px 40px; border-radius: 16px; border-left: 6px solid var(--candy-pink);">
+            <li><strong>難度一：</strong> 兩個真分數（共 7 題）</li>
+            <li><strong>難度二：</strong> 兩個帶分數（共 5 題）</li>
+            <li><strong>難度三：</strong> 帶分數與假分數（共 5 題，<span style="color:var(--candy-purple)">需轉為帶分數作答</span>）</li>
+            <li>🎯 答對加 20 分，連續答對加額外 5 分！</li>
+            <li><span style="color:var(--candy-red)">⚠️ 答錯必須修正至正確為止，且會額外增加一題！</span></li>
         </ul>
         <button class="btn-primary" onclick="startGame()">開始遊戲</button>
     </div>
@@ -193,37 +270,37 @@
             <div class="stat-item">關卡: <span id="ui-level">1</span></div>
             <div class="stat-item">剩餘題數: <span id="ui-left">7</span></div>
             <div class="stat-item">分數: <span id="ui-score">0</span> (連擊: <span id="ui-combo">0</span>)</div>
-            <div class="stat-item">錯誤: <span id="ui-mistakes" style="color:#ff6b6b">0</span>次</div>
+            <div class="stat-item stat-mistake">錯誤: <span id="ui-mistakes">0</span>次</div>
             <div class="stat-item">時間: <span id="ui-time">00:00</span></div>
         </div>
 
-        <h2 id="level-title">難度一：兩個真分數</h2>
+        <h2 id="level-title" style="font-size: 1.8em; margin-top:0;">難度一：兩個真分數</h2>
         
         <div class="question-area">
             <!-- 分數 1 -->
             <div class="fraction-group">
-                <div class="fraction-display" id="q-frac1"></div>
+                <div class="question-display" id="q-frac1"></div>
                 <div class="arrow">通分後 ⬇️</div>
                 <div class="fraction-input-group">
-                    <div class="int-part" id="ans-int1" style="display:none;"></div>
+                    <input type="number" id="input-int1" class="input-int" placeholder="整數">
                     <div class="frac-input-part">
-                        <input type="number" id="input-n1" inputmode="numeric" pattern="\d*">
+                        <input type="number" id="input-n1" placeholder="分子">
                         <hr>
-                        <input type="number" id="input-d1" inputmode="numeric" pattern="\d*">
+                        <input type="number" id="input-d1" placeholder="分母">
                     </div>
                 </div>
             </div>
 
             <!-- 分數 2 -->
             <div class="fraction-group">
-                <div class="fraction-display" id="q-frac2"></div>
+                <div class="question-display" id="q-frac2"></div>
                 <div class="arrow">通分後 ⬇️</div>
                 <div class="fraction-input-group">
-                    <div class="int-part" id="ans-int2" style="display:none;"></div>
+                    <input type="number" id="input-int2" class="input-int" placeholder="整數">
                     <div class="frac-input-part">
-                        <input type="number" id="input-n2" inputmode="numeric" pattern="\d*">
+                        <input type="number" id="input-n2" placeholder="分子">
                         <hr>
-                        <input type="number" id="input-d2" inputmode="numeric" pattern="\d*">
+                        <input type="number" id="input-d2" placeholder="分母">
                     </div>
                 </div>
             </div>
@@ -235,26 +312,28 @@
 
     <!-- 關卡結算畫面 -->
     <div id="screen-level-summary" class="screen">
-        <h1 id="lvl-sum-title">關卡完成！</h1>
-        <h2 style="color: var(--primary)">太棒了！準備進入下一關！</h2>
-        <p class="stat-item">目前總分：<span id="lvl-sum-score">0</span></p>
-        <p class="stat-item">累積錯題：<span id="lvl-sum-mistakes" style="color:red">0</span></p>
+        <h1 id="lvl-sum-title" style="font-size:2.5em;">🎉 關卡完成！ 🎉</h1>
+        <h2 style="color: var(--candy-pink)">太棒了！準備進入下一關！</h2>
+        <div style="background: #f1f2f6; padding: 20px 40px; border-radius: 20px; text-align: center; margin: 20px 0;">
+            <p style="font-size:1.5em; font-weight:bold; color:var(--dark);">目前總分：<span id="lvl-sum-score" style="color:var(--candy-green)">0</span></p>
+            <p style="font-size:1.2em; font-weight:bold; color:var(--dark);">累積錯題：<span id="lvl-sum-mistakes" style="color:var(--candy-red)">0</span></p>
+        </div>
         <button class="btn-primary" onclick="nextLevel()">進入下一關</button>
     </div>
 
     <!-- 最終結算畫面 -->
     <div id="screen-final" class="screen">
-        <h1>🏆 遊戲總結算 🏆</h1>
-        <h2 style="color: var(--primary)">總分：<span id="final-score">0</span></h2>
-        <p>總耗時：<span id="final-time">00:00</span> | 總錯誤次數：<span id="final-mistakes" style="color:red">0</span></p>
+        <h1 style="font-size:2.5em;">🏆 遊戲總結算 🏆</h1>
+        <h2 style="color: var(--candy-pink); font-size:2em;">總分：<span id="final-score">0</span></h2>
+        <p style="font-size:1.2em; font-weight:bold; color:#7f8fa6;">總耗時：<span id="final-time">00:00</span> | 總錯誤次數：<span id="final-mistakes" style="color:var(--candy-red)">0</span></p>
         
-        <div style="width:100%; overflow-x:auto;">
+        <div class="table-container">
             <table id="history-table">
                 <thead>
                     <tr>
                         <th>關卡</th>
                         <th>原題目</th>
-                        <th>你的答案</th>
+                        <th>你的首次作答</th>
                         <th>正確答案</th>
                         <th>結果</th>
                     </tr>
@@ -263,7 +342,7 @@
             </table>
         </div>
         
-        <button onclick="location.reload()">再玩一次</button>
+        <button class="btn-primary" onclick="location.reload()">再玩一次</button>
     </div>
 
 </div>
@@ -280,17 +359,16 @@
     let historyData = [];
     let currentQuestion = {};
     
-    // 新增控制變數
-    let level1QuestionsAsked = 0; // 追蹤第一關的題數，用於控制難度漸進
-    let coprimeUsed = 0; // 追蹤互質分母出現的次數
-    const COPRIME_LIMIT = 2; // 整個遊戲中最多容許的互質分母題數
+    let level1QuestionsAsked = 0; 
+    let coprimeUsed = 0; 
+    const COPRIME_LIMIT = 2; 
 
     // --- 數學輔助函數 ---
     const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
     const lcm = (a, b) => (a * b) / gcd(a, b);
     const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-    // 產生一個已約簡的分數 (保證分子分母互質)
+    // 產生約簡分數
     function generateFractionWithDenominator(d, isImproper) {
         let n;
         do {
@@ -303,103 +381,80 @@
         return n;
     }
 
-    // --- 題目生成器 ---
+    // 產生包含排版的 HTML 分數 (帶分數/真假分數)
+    function formatFractionTableHTML(f) {
+        let html = '<div class="frac-inline">';
+        if (f.int > 0) {
+            html += `<div class="int-part">${f.int}</div>`;
+        }
+        if (f.n > 0) {
+            html += `<div class="frac-part"><div class="num">${f.n}</div><div class="den">${f.d}</div></div>`;
+        }
+        html += '</div>';
+        return html;
+    }
+
+    // 產生題目資料並精確計算轉換後的帶分數
     function generateQuestionData() {
-        let q = { type: currentLevel, f1: {}, f2: {}, ans1: {}, ans2: {} };
-        let d1, d2;
-        let validPair = false;
-        
-        // 70% 機率強制產生有公因數的分母，或者當互質組合已達上限時 100% 強制
+        let q = { type: currentLevel, f1: {}, f2: {}, ans1: {}, ans2: {}, attempted: false };
+        let d1, d2, validPair = false;
         let forceSharedFactor = (Math.random() < 0.7) || (coprimeUsed >= COPRIME_LIMIT);
 
-        // 挑選適合的分母對
         while (!validPair) {
             if (currentLevel === 1) {
                 if (level1QuestionsAsked < 3) {
-                    // 前 3 題：皆為個位數分母
-                    d1 = rand(2, 9);
-                    d2 = rand(2, 9);
+                    d1 = rand(2, 9); d2 = rand(2, 9);
                 } else {
-                    // 第 4 題起：一個個位數，一個兩位數
-                    d1 = rand(2, 9);
-                    d2 = rand(10, 24);
-                    if (Math.random() > 0.5) [d1, d2] = [d2, d1]; // 打亂左右
+                    d1 = rand(2, 9); d2 = rand(10, 24);
+                    if (Math.random() > 0.5) [d1, d2] = [d2, d1];
                 }
             } else {
-                // 第二、三關：靈活的兩位數與個位數混合
-                d1 = rand(3, 12);
-                d2 = rand(4, 15);
+                d1 = rand(3, 12); d2 = rand(4, 15);
             }
 
-            if (d1 === d2) continue; // 不可同分母
-
+            if (d1 === d2) continue; 
             let g = gcd(d1, d2);
             if (forceSharedFactor && g === 1) {
-                // 如果需要公因數但產生了互質分母，則重新產生
                 continue;
             } else {
-                if (g === 1) coprimeUsed++; // 記錄使用了一次互質分母
+                if (g === 1) coprimeUsed++; 
                 validPair = true;
             }
         }
 
         if (currentLevel === 1) {
             level1QuestionsAsked++;
-            q.f1 = { int: 0, n: generateFractionWithDenominator(d1, false), d: d1, isImproper: false };
-            q.f2 = { int: 0, n: generateFractionWithDenominator(d2, false), d: d2, isImproper: false };
-
+            q.f1 = { int: 0, n: generateFractionWithDenominator(d1, false), d: d1 };
+            q.f2 = { int: 0, n: generateFractionWithDenominator(d2, false), d: d2 };
         } else if (currentLevel === 2) {
             let sameInt = Math.random() > 0.5;
             let int1 = rand(1, 5);
             let int2 = sameInt ? int1 : rand(1, 5);
             if (!sameInt && int1 === int2) int2++;
 
-            q.f1 = { int: int1, n: generateFractionWithDenominator(d1, false), d: d1, isImproper: false };
-            q.f2 = { int: int2, n: generateFractionWithDenominator(d2, false), d: d2, isImproper: false };
-
+            q.f1 = { int: int1, n: generateFractionWithDenominator(d1, false), d: d1 };
+            q.f2 = { int: int2, n: generateFractionWithDenominator(d2, false), d: d2 };
         } else if (currentLevel === 3) {
             let int1 = rand(1, 5);
-            
-            // 隨機決定左邊還是右邊是假分數
             if(Math.random() > 0.5) {
-                q.f1 = { int: int1, n: generateFractionWithDenominator(d1, false), d: d1, isImproper: false };
-                q.f2 = { int: 0, n: generateFractionWithDenominator(d2, true), d: d2, isImproper: true };
+                q.f1 = { int: int1, n: generateFractionWithDenominator(d1, false), d: d1 };
+                q.f2 = { int: 0, n: generateFractionWithDenominator(d2, true), d: d2 };
             } else {
-                q.f1 = { int: 0, n: generateFractionWithDenominator(d1, true), d: d1, isImproper: true };
-                q.f2 = { int: int1, n: generateFractionWithDenominator(d2, false), d: d2, isImproper: false };
+                q.f1 = { int: 0, n: generateFractionWithDenominator(d1, true), d: d1 };
+                q.f2 = { int: int1, n: generateFractionWithDenominator(d2, false), d: d2 };
             }
         }
 
-        // 計算通分結果
         let commonLcm = lcm(q.f1.d, q.f2.d);
         
-        q.ans1 = {
-            int: q.f1.int, 
-            n: q.f1.n * (commonLcm / q.f1.d), 
-            d: commonLcm
-        };
-        q.ans2 = {
-            int: q.f2.int, 
-            n: q.f2.n * (commonLcm / q.f2.d), 
-            d: commonLcm
-        };
+        // 核心邏輯：將通分後的數值自動轉化為標準帶分數/真分數
+        let total_n1 = (q.f1.int * commonLcm) + (q.f1.n * (commonLcm / q.f1.d));
+        q.ans1 = { int: Math.floor(total_n1 / commonLcm), n: total_n1 % commonLcm, d: commonLcm };
+        
+        let total_n2 = (q.f2.int * commonLcm) + (q.f2.n * (commonLcm / q.f2.d));
+        q.ans2 = { int: Math.floor(total_n2 / commonLcm), n: total_n2 % commonLcm, d: commonLcm };
 
         return q;
-    }
-
-    // --- UI 渲染輔助 ---
-    function formatFractionHTML(f) {
-        let html = '';
-        if (f.int > 0) {
-            html += `<div class="int-part">${f.int}</div>`;
-        }
-        html += `<div class="frac-part"><div class="num">${f.n}</div><div class="den">${f.d}</div></div>`;
-        return html;
-    }
-
-    function formatFractionString(f) {
-        if (f.int > 0) return `${f.int}又 ${f.n}/${f.d}`;
-        return `${f.n}/${f.d}`;
     }
 
     // --- 遊戲流程控制 ---
@@ -424,14 +479,8 @@
     }
 
     function startGame() {
-        currentLevel = 1;
-        score = 0;
-        combo = 0;
-        mistakes = 0;
-        totalSeconds = 0;
-        historyData = [];
-        level1QuestionsAsked = 0;
-        coprimeUsed = 0;
+        currentLevel = 1; score = 0; combo = 0; mistakes = 0; totalSeconds = 0;
+        historyData = []; level1QuestionsAsked = 0; coprimeUsed = 0;
         timerInterval = setInterval(updateTimer, 1000);
         setupLevel();
         switchScreen('screen-game');
@@ -455,96 +504,106 @@
         updateStatsUI();
         currentQuestion = generateQuestionData();
         
-        document.getElementById('q-frac1').innerHTML = formatFractionHTML(currentQuestion.f1);
-        document.getElementById('q-frac2').innerHTML = formatFractionHTML(currentQuestion.f2);
+        document.getElementById('q-frac1').innerHTML = formatFractionTableHTML(currentQuestion.f1);
+        document.getElementById('q-frac2').innerHTML = formatFractionTableHTML(currentQuestion.f2);
 
-        ['input-n1', 'input-d1', 'input-n2', 'input-d2'].forEach(id => {
-            document.getElementById(id).value = '';
-            document.getElementById(id).style.borderColor = '#ccc';
-        });
+        // 重置並動態顯示輸入框
+        const resetInputs = (idx, hasInt) => {
+            let intInp = document.getElementById(`input-int${idx}`);
+            let nInp = document.getElementById(`input-n${idx}`);
+            let dInp = document.getElementById(`input-d${idx}`);
+            
+            nInp.value = ''; dInp.value = ''; intInp.value = '';
+            nInp.style.borderColor = '#dcdde1'; dInp.style.borderColor = '#dcdde1'; intInp.style.borderColor = '#dcdde1';
+            
+            intInp.style.display = hasInt ? 'block' : 'none';
+        };
 
-        let ansInt1 = document.getElementById('ans-int1');
-        if (currentQuestion.f1.int > 0) {
-            ansInt1.textContent = currentQuestion.f1.int;
-            ansInt1.style.display = 'block';
-        } else {
-            ansInt1.style.display = 'none';
-        }
-
-        let ansInt2 = document.getElementById('ans-int2');
-        if (currentQuestion.f2.int > 0) {
-            ansInt2.textContent = currentQuestion.f2.int;
-            ansInt2.style.display = 'block';
-        } else {
-            ansInt2.style.display = 'none';
-        }
+        resetInputs(1, currentQuestion.ans1.int > 0);
+        resetInputs(2, currentQuestion.ans2.int > 0);
 
         document.getElementById('feedback-msg').textContent = '';
     }
 
     function checkAnswer() {
+        let int1 = parseInt(document.getElementById('input-int1').value) || 0;
         let n1 = parseInt(document.getElementById('input-n1').value);
         let d1 = parseInt(document.getElementById('input-d1').value);
+        let int2 = parseInt(document.getElementById('input-int2').value) || 0;
         let n2 = parseInt(document.getElementById('input-n2').value);
         let d2 = parseInt(document.getElementById('input-d2').value);
 
         if (isNaN(n1) || isNaN(d1) || isNaN(n2) || isNaN(d2)) {
-            document.getElementById('feedback-msg').textContent = "⚠️ 請填滿所有空格！";
-            document.getElementById('feedback-msg').style.color = "orange";
+            document.getElementById('feedback-msg').textContent = "⚠️ 請填滿所有分子與分母空格！";
+            document.getElementById('feedback-msg').style.color = "var(--candy-yellow)";
             return;
         }
 
-        let ans1Correct = (n1 === currentQuestion.ans1.n && d1 === currentQuestion.ans1.d);
-        let ans2Correct = (n2 === currentQuestion.ans2.n && d2 === currentQuestion.ans2.d);
+        let ans1Correct = (int1 === currentQuestion.ans1.int && n1 === currentQuestion.ans1.n && d1 === currentQuestion.ans1.d);
+        let ans2Correct = (int2 === currentQuestion.ans2.int && n2 === currentQuestion.ans2.n && d2 === currentQuestion.ans2.d);
         let isCorrect = ans1Correct && ans2Correct;
 
-        let qStr = `${formatFractionString(currentQuestion.f1)} 及 ${formatFractionString(currentQuestion.f2)}`;
-        let uInput1 = { int: currentQuestion.ans1.int, n: n1, d: d1 };
-        let uInput2 = { int: currentQuestion.ans2.int, n: n2, d: d2 };
-        let uStr = `${formatFractionString(uInput1)} 及 ${formatFractionString(uInput2)}`;
-        let cStr = `${formatFractionString(currentQuestion.ans1)} 及 ${formatFractionString(currentQuestion.ans2)}`;
-
-        historyData.push({
-            level: currentLevel,
-            qStr: qStr,
-            uStr: uStr,
-            cStr: cStr,
-            isCorrect: isCorrect
-        });
-
-        if (isCorrect) {
-            score += 20;
-            if (combo > 0) score += 5; 
-            combo++;
-            questionsToPass--;
-            document.getElementById('feedback-msg').textContent = "✅ 答對了！";
-            document.getElementById('feedback-msg').style.color = "green";
-        } else {
-            combo = 0;
-            mistakes++;
-            questionsToPass++; 
-            document.getElementById('feedback-msg').textContent = "❌ 答錯了！已增加額外一題。";
-            document.getElementById('feedback-msg').style.color = "red";
+        // 僅紀錄首次作答至結算表
+        if (!currentQuestion.attempted) {
+            currentQuestion.attempted = true;
             
-            if(!ans1Correct) {
-                document.getElementById('input-n1').style.borderColor = 'red';
-                document.getElementById('input-d1').style.borderColor = 'red';
+            let qStr = formatFractionTableHTML(currentQuestion.f1) + " 及 " + formatFractionTableHTML(currentQuestion.f2);
+            let uStr = formatFractionTableHTML({int: int1, n: n1, d: d1}) + " 及 " + formatFractionTableHTML({int: int2, n: n2, d: d2});
+            let cStr = formatFractionTableHTML(currentQuestion.ans1) + " 及 " + formatFractionTableHTML(currentQuestion.ans2);
+
+            historyData.push({
+                level: currentLevel,
+                qStr: qStr,
+                uStr: uStr,
+                cStr: cStr,
+                isCorrect: isCorrect
+            });
+
+            if (isCorrect) {
+                score += 20;
+                if (combo > 0) score += 5; 
+                combo++;
+                questionsToPass--;
+            } else {
+                combo = 0;
+                mistakes++;
+                questionsToPass++; // 首次答錯增加一題懲罰
             }
-            if(!ans2Correct) {
-                document.getElementById('input-n2').style.borderColor = 'red';
-                document.getElementById('input-d2').style.borderColor = 'red';
+            updateStatsUI();
+        } else {
+            // 已是修正答案的情況
+            if (isCorrect) {
+                questionsToPass--;
+                updateStatsUI();
             }
         }
 
-        updateStatsUI();
-
-        setTimeout(() => {
-            if (questionsToPass <= 0) {
-                endLevel();
-            } else {
-                loadNextQuestion();
+        const markInput = (idx, isAnsCorrect) => {
+            let color = isAnsCorrect ? 'var(--candy-green)' : 'var(--candy-red)';
+            document.getElementById(`input-n${idx}`).style.borderColor = color;
+            document.getElementById(`input-d${idx}`).style.borderColor = color;
+            if (currentQuestion[`ans${idx}`].int > 0) {
+                document.getElementById(`input-int${idx}`).style.borderColor = color;
             }
-        }, 1500);
+        };
+
+        markInput(1, ans1Correct);
+        markInput(2, ans2Correct);
+
+        let fbMsg = document.getElementById('feedback-msg');
+        if (isCorrect) {
+            fbMsg.textContent = "✅ 完全正確！";
+            fbMsg.style.color = "var(--candy-green)";
+            
+            // 答對才允許進入下一題/過關
+            setTimeout(() => {
+                if (questionsToPass <= 0) endLevel();
+                else loadNextQuestion();
+            }, 1200);
+        } else {
+            fbMsg.textContent = "❌ 答錯了！請修正錯誤的紅框部分。";
+            fbMsg.style.color = "var(--candy-red)";
+        }
     }
 
     function endLevel() {
@@ -577,7 +636,7 @@
         historyData.forEach(item => {
             let row = document.createElement('tr');
             row.innerHTML = `
-                <td>${item.level}</td>
+                <td style="font-weight:bold;">${item.level}</td>
                 <td>${item.qStr}</td>
                 <td class="${item.isCorrect ? 'correct-text' : 'wrong-text'}">${item.uStr}</td>
                 <td>${item.cStr}</td>
