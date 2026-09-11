@@ -255,7 +255,7 @@
         <h1>🚀 異分母通分挑戰賽 🚀</h1>
         <p style="font-size: 1.2em; color: #7f8fa6; font-weight: bold;">準備好迎接通分與最小公倍數的考驗了嗎？</p>
         <ul style="text-align:left; line-height:2; font-size:1.1em; background: #f1f2f6; padding: 25px 40px; border-radius: 16px; border-left: 6px solid var(--candy-pink);">
-            <li><strong>難度一：</strong> 兩個真分數（共 7 題）</li>
+            <li><strong>難度一：</strong> 兩個真分數（共 7 題，分母為 2-10）</li>
             <li><strong>難度二：</strong> 兩個帶分數（共 5 題）</li>
             <li><strong>難度三：</strong> 帶分數與假分數（共 5 題，<span style="color:var(--candy-purple)">需轉為帶分數作答</span>）</li>
             <li>🎯 答對加 20 分，連續答對加額外 5 分！</li>
@@ -359,7 +359,6 @@
     let historyData = [];
     let currentQuestion = {};
     
-    let level1QuestionsAsked = 0; 
     let coprimeUsed = 0; 
     const COPRIME_LIMIT = 2; 
 
@@ -402,14 +401,11 @@
 
         while (!validPair) {
             if (currentLevel === 1) {
-                if (level1QuestionsAsked < 3) {
-                    d1 = rand(2, 9); d2 = rand(2, 9);
-                } else {
-                    d1 = rand(2, 9); d2 = rand(10, 24);
-                    if (Math.random() > 0.5) [d1, d2] = [d2, d1];
-                }
+                d1 = rand(2, 10); 
+                d2 = rand(2, 10);
             } else {
-                d1 = rand(3, 12); d2 = rand(4, 15);
+                d1 = rand(3, 12); 
+                d2 = rand(4, 15);
             }
 
             if (d1 === d2) continue; 
@@ -423,7 +419,6 @@
         }
 
         if (currentLevel === 1) {
-            level1QuestionsAsked++;
             q.f1 = { int: 0, n: generateFractionWithDenominator(d1, false), d: d1 };
             q.f2 = { int: 0, n: generateFractionWithDenominator(d2, false), d: d2 };
         } else if (currentLevel === 2) {
@@ -480,7 +475,7 @@
 
     function startGame() {
         currentLevel = 1; score = 0; combo = 0; mistakes = 0; totalSeconds = 0;
-        historyData = []; level1QuestionsAsked = 0; coprimeUsed = 0;
+        historyData = []; coprimeUsed = 0;
         timerInterval = setInterval(updateTimer, 1000);
         setupLevel();
         switchScreen('screen-game');
