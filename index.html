@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>異分母通分挑戰賽</title>
+    <title>異分母通分挑戰賽 (Common Denominator Challenge)</title>
     <style>
         :root {
             --primary: #4CAF50;
@@ -99,7 +99,6 @@
             margin: 20px 0;
         }
         
-        /* 橫向 iPad 佈局 */
         @media (min-width: 600px) {
             .question-area {
                 flex-direction: row;
@@ -272,7 +271,7 @@
 <script>
     // --- 遊戲狀態變數 ---
     let currentLevel = 1;
-    let questionsToPass = 0; // 該關卡需要答對的題數
+    let questionsToPass = 0;
     let score = 0;
     let combo = 0;
     let mistakes = 0;
@@ -280,83 +279,94 @@
     let totalSeconds = 0;
     let historyData = [];
     let currentQuestion = {};
+    
+    // 新增控制變數
+    let level1QuestionsAsked = 0; // 追蹤第一關的題數，用於控制難度漸進
+    let coprimeUsed = 0; // 追蹤互質分母出現的次數
+    const COPRIME_LIMIT = 2; // 整個遊戲中最多容許的互質分母題數
 
     // --- 數學輔助函數 ---
     const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
     const lcm = (a, b) => (a * b) / gcd(a, b);
     const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-    // 生成一個已約簡的真分數 (分子, 分母)
-    function generateProperFraction(minD, maxD) {
-        let d, n;
+    // 產生一個已約簡的分數 (保證分子分母互質)
+    function generateFractionWithDenominator(d, isImproper) {
+        let n;
         do {
-            d = rand(minD, maxD);
-            n = rand(1, d - 1);
+            if (isImproper) {
+                n = rand(d + 1, d + 15);
+            } else {
+                n = rand(1, d - 1);
+            }
         } while (gcd(n, d) !== 1);
-        return { n, d };
-    }
-
-    // 生成一個已約簡的假分數 (分子, 分母)
-    function generateImproperFraction(minD, maxD) {
-        let d, n;
-        do {
-            d = rand(minD, maxD);
-            n = rand(d + 1, d + 15);
-        } while (gcd(n, d) !== 1);
-        return { n, d };
+        return n;
     }
 
     // --- 題目生成器 ---
     function generateQuestionData() {
         let q = { type: currentLevel, f1: {}, f2: {}, ans1: {}, ans2: {} };
+        let d1, d2;
+        let validPair = false;
         
+        // 70% 機率強制產生有公因數的分母，或者當互質組合已達上限時 100% 強制
+        let forceSharedFactor = (Math.random() < 0.7) || (coprimeUsed >= COPRIME_LIMIT);
+
+        // 挑選適合的分母對
+        while (!validPair) {
+            if (currentLevel === 1) {
+                if (level1QuestionsAsked < 3) {
+                    // 前 3 題：皆為個位數分母
+                    d1 = rand(2, 9);
+                    d2 = rand(2, 9);
+                } else {
+                    // 第 4 題起：一個個位數，一個兩位數
+                    d1 = rand(2, 9);
+                    d2 = rand(10, 24);
+                    if (Math.random() > 0.5) [d1, d2] = [d2, d1]; // 打亂左右
+                }
+            } else {
+                // 第二、三關：靈活的兩位數與個位數混合
+                d1 = rand(3, 12);
+                d2 = rand(4, 15);
+            }
+
+            if (d1 === d2) continue; // 不可同分母
+
+            let g = gcd(d1, d2);
+            if (forceSharedFactor && g === 1) {
+                // 如果需要公因數但產生了互質分母，則重新產生
+                continue;
+            } else {
+                if (g === 1) coprimeUsed++; // 記錄使用了一次互質分母
+                validPair = true;
+            }
+        }
+
         if (currentLevel === 1) {
-            // 兩個真分數 (一位和兩位數分母)
-            let d1 = rand(2, 9);
-            let d2 = rand(10, 25);
-            // 隨機打亂位置
-            if (Math.random() > 0.5) [d1, d2] = [d2, d1];
-            
-            let frac1 = generateProperFraction(d1, d1);
-            let frac2 = generateProperFraction(d2, d2);
-            
-            q.f1 = { int: 0, n: frac1.n, d: frac1.d, isImproper: false };
-            q.f2 = { int: 0, n: frac2.n, d: frac2.d, isImproper: false };
+            level1QuestionsAsked++;
+            q.f1 = { int: 0, n: generateFractionWithDenominator(d1, false), d: d1, isImproper: false };
+            q.f2 = { int: 0, n: generateFractionWithDenominator(d2, false), d: d2, isImproper: false };
 
         } else if (currentLevel === 2) {
-            // 兩個帶分數
-            let sameInt = Math.random() > 0.5; // 50%機率整數相同
+            let sameInt = Math.random() > 0.5;
             let int1 = rand(1, 5);
             let int2 = sameInt ? int1 : rand(1, 5);
-            if(!sameInt && int1 === int2) int2++; // 確保不相同
+            if (!sameInt && int1 === int2) int2++;
 
-            let d1 = rand(3, 12);
-            let d2 = rand(3, 12);
-            while(d1 === d2) d2 = rand(3, 12);
-
-            let frac1 = generateProperFraction(d1, d1);
-            let frac2 = generateProperFraction(d2, d2);
-
-            q.f1 = { int: int1, n: frac1.n, d: frac1.d, isImproper: false };
-            q.f2 = { int: int2, n: frac2.n, d: frac2.d, isImproper: false };
+            q.f1 = { int: int1, n: generateFractionWithDenominator(d1, false), d: d1, isImproper: false };
+            q.f2 = { int: int2, n: generateFractionWithDenominator(d2, false), d: d2, isImproper: false };
 
         } else if (currentLevel === 3) {
-            // 一個帶分數和一個假分數
             let int1 = rand(1, 5);
-            let d1 = rand(2, 9);
-            let frac1 = generateProperFraction(d1, d1);
-
-            let d2 = rand(2, 9);
-            while(d1 === d2) d2 = rand(2, 9);
-            let frac2 = generateImproperFraction(d2, d2);
-
-            // 隨機打亂左/右邊的題型
+            
+            // 隨機決定左邊還是右邊是假分數
             if(Math.random() > 0.5) {
-                q.f1 = { int: int1, n: frac1.n, d: frac1.d, isImproper: false };
-                q.f2 = { int: 0, n: frac2.n, d: frac2.d, isImproper: true };
+                q.f1 = { int: int1, n: generateFractionWithDenominator(d1, false), d: d1, isImproper: false };
+                q.f2 = { int: 0, n: generateFractionWithDenominator(d2, true), d: d2, isImproper: true };
             } else {
-                q.f1 = { int: 0, n: frac2.n, d: frac2.d, isImproper: true };
-                q.f2 = { int: int1, n: frac1.n, d: frac1.d, isImproper: false };
+                q.f1 = { int: 0, n: generateFractionWithDenominator(d1, true), d: d1, isImproper: true };
+                q.f2 = { int: int1, n: generateFractionWithDenominator(d2, false), d: d2, isImproper: false };
             }
         }
 
@@ -420,6 +430,8 @@
         mistakes = 0;
         totalSeconds = 0;
         historyData = [];
+        level1QuestionsAsked = 0;
+        coprimeUsed = 0;
         timerInterval = setInterval(updateTimer, 1000);
         setupLevel();
         switchScreen('screen-game');
@@ -443,17 +455,14 @@
         updateStatsUI();
         currentQuestion = generateQuestionData();
         
-        // 渲染題目
         document.getElementById('q-frac1').innerHTML = formatFractionHTML(currentQuestion.f1);
         document.getElementById('q-frac2').innerHTML = formatFractionHTML(currentQuestion.f2);
 
-        // 重置輸入框
         ['input-n1', 'input-d1', 'input-n2', 'input-d2'].forEach(id => {
             document.getElementById(id).value = '';
             document.getElementById(id).style.borderColor = '#ccc';
         });
 
-        // 設置整數部分顯示（如果有）
         let ansInt1 = document.getElementById('ans-int1');
         if (currentQuestion.f1.int > 0) {
             ansInt1.textContent = currentQuestion.f1.int;
@@ -474,7 +483,6 @@
     }
 
     function checkAnswer() {
-        // 讀取玩家輸入
         let n1 = parseInt(document.getElementById('input-n1').value);
         let d1 = parseInt(document.getElementById('input-d1').value);
         let n2 = parseInt(document.getElementById('input-n2').value);
@@ -486,14 +494,11 @@
             return;
         }
 
-        // 檢查答案是否與 L.C.M. 通分結果一致
         let ans1Correct = (n1 === currentQuestion.ans1.n && d1 === currentQuestion.ans1.d);
         let ans2Correct = (n2 === currentQuestion.ans2.n && d2 === currentQuestion.ans2.d);
         let isCorrect = ans1Correct && ans2Correct;
 
-        // 記錄歷史
         let qStr = `${formatFractionString(currentQuestion.f1)} 及 ${formatFractionString(currentQuestion.f2)}`;
-        
         let uInput1 = { int: currentQuestion.ans1.int, n: n1, d: d1 };
         let uInput2 = { int: currentQuestion.ans2.int, n: n2, d: d2 };
         let uStr = `${formatFractionString(uInput1)} 及 ${formatFractionString(uInput2)}`;
@@ -509,7 +514,7 @@
 
         if (isCorrect) {
             score += 20;
-            if (combo > 0) score += 5; // 連擊獎勵
+            if (combo > 0) score += 5; 
             combo++;
             questionsToPass--;
             document.getElementById('feedback-msg').textContent = "✅ 答對了！";
@@ -517,11 +522,10 @@
         } else {
             combo = 0;
             mistakes++;
-            questionsToPass++; // 懲罰：加一題
+            questionsToPass++; 
             document.getElementById('feedback-msg').textContent = "❌ 答錯了！已增加額外一題。";
             document.getElementById('feedback-msg').style.color = "red";
             
-            // 提示錯誤框
             if(!ans1Correct) {
                 document.getElementById('input-n1').style.borderColor = 'red';
                 document.getElementById('input-d1').style.borderColor = 'red';
@@ -534,7 +538,6 @@
 
         updateStatsUI();
 
-        // 延遲後換題或換關
         setTimeout(() => {
             if (questionsToPass <= 0) {
                 endLevel();
@@ -569,7 +572,6 @@
         let s = (totalSeconds % 60).toString().padStart(2, '0');
         document.getElementById('final-time').textContent = `${m}:${s}`;
 
-        // 建立表格
         let tbody = document.getElementById('history-body');
         tbody.innerHTML = '';
         historyData.forEach(item => {
