@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>異分母通分挑戰賽</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --danger: #f44336;
+            --dark: #333;
+            --light: #f9f9f9;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            width: 95%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin: 20px 0;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .active { display: flex; }
+
+        /* UI Header */
+        #header-stats {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            background: var(--dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat-item {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .stat-item span { color: #ffd700; }
+
+        /* Typography */
+        h1, h2, h3 { color: var(--dark); text-align: center; }
+
+        /* Buttons */
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 4px #0b7dda;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 transparent;
+        }
+        button.btn-primary { background-color: var(--primary); box-shadow: 0 4px #388E3C; }
+
+        /* Fraction Display & Inputs */
+        .question-area {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        /* 橫向 iPad 佈局 */
+        @media (min-width: 600px) {
+            .question-area {
+                flex-direction: row;
+                justify-content: space-evenly;
+            }
+        }
+
+        .fraction-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            min-width: 200px;
+        }
+
+        .fraction-display {
+            display: flex;
+            align-items: center;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .int-part { margin-right: 5px; font-weight: bold; }
+        .frac-part { display: flex; flex-direction: column; align-items: center; }
+        .frac-part .num { border-bottom: 2px solid var(--dark); padding: 0 5px; }
+        .frac-part .den { padding: 0 5px; }
+
+        .arrow { font-size: 1.5em; color: #888; margin: 10px 0; }
+
+        .fraction-input-group {
+            display: flex;
+            align-items: center;
+            font-size: 1.5em;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            height: 40px;
+            font-size: 1.2em;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+        
+        .frac-input-part {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .frac-input-part hr { width: 100%; border: 1px solid var(--dark); margin: 2px 0; }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background-color: var(--secondary); color: white; }
+        .correct-text { color: green; font-weight: bold; }
+        .wrong-text { color: red; font-weight: bold; }
+
+        #feedback-msg { font-size: 1.3em; font-weight: bold; height: 30px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    
+    <!-- 標題畫面 -->
+    <div id="screen-start" class="screen active">
+        <h1>🚀 異分母通分挑戰賽 🚀</h1>
+        <p>歡迎來到通分挑戰！請找出分母的最小公倍數（L.C.M.）來通分。</p>
+        <ul style="text-align:left; line-height:1.8;">
+            <li><strong>難度一：</strong> 兩個真分數（共7題）</li>
+            <li><strong>難度二：</strong> 兩個帶分數（共5題）</li>
+            <li><strong>難度三：</strong> 帶分數與假分數（共5題）</li>
+            <li>答對加 20 分，連續答對加額外 5 分！</li>
+            <li><span style="color:red">注意：答錯會額外增加一題！</span></li>
+        </ul>
+        <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+    </div>
+
+    <!-- 遊戲畫面 -->
+    <div id="screen-game" class="screen">
+        <div id="header-stats">
+            <div class="stat-item">關卡: <span id="ui-level">1</span></div>
+            <div class="stat-item">剩餘題數: <span id="ui-left">7</span></div>
+            <div class="stat-item">分數: <span id="ui-score">0</span> (連擊: <span id="ui-combo">0</span>)</div>
+            <div class="stat-item">錯誤: <span id="ui-mistakes" style="color:#ff6b6b">0</span>次</div>
+            <div class="stat-item">時間: <span id="ui-time">00:00</span></div>
+        </div>
+
+        <h2 id="level-title">難度一：兩個真分數</h2>
+        
+        <div class="question-area">
+            <!-- 分數 1 -->
+            <div class="fraction-group">
+                <div class="fraction-display" id="q-frac1"></div>
+                <div class="arrow">通分後 ⬇️</div>
+                <div class="fraction-input-group">
+                    <div class="int-part" id="ans-int1" style="display:none;"></div>
+                    <div class="frac-input-part">
+                        <input type="number" id="input-n1" inputmode="numeric" pattern="\d*">
+                        <hr>
+                        <input type="number" id="input-d1" inputmode="numeric" pattern="\d*">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分數 2 -->
+            <div class="fraction-group">
+                <div class="fraction-display" id="q-frac2"></div>
+                <div class="arrow">通分後 ⬇️</div>
+                <div class="fraction-input-group">
+                    <div class="int-part" id="ans-int2" style="display:none;"></div>
+                    <div class="frac-input-part">
+                        <input type="number" id="input-n2" inputmode="numeric" pattern="\d*">
+                        <hr>
+                        <input type="number" id="input-d2" inputmode="numeric" pattern="\d*">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="feedback-msg"></div>
+        <button onclick="checkAnswer()">提交答案</button>
+    </div>
+
+    <!-- 關卡結算畫面 -->
+    <div id="screen-level-summary" class="screen">
+        <h1 id="lvl-sum-title">關卡完成！</h1>
+        <h2 style="color: var(--primary)">太棒了！準備進入下一關！</h2>
+        <p class="stat-item">目前總分：<span id="lvl-sum-score">0</span></p>
+        <p class="stat-item">累積錯題：<span id="lvl-sum-mistakes" style="color:red">0</span></p>
+        <button class="btn-primary" onclick="nextLevel()">進入下一關</button>
+    </div>
+
+    <!-- 最終結算畫面 -->
+    <div id="screen-final" class="screen">
+        <h1>🏆 遊戲總結算 🏆</h1>
+        <h2 style="color: var(--primary)">總分：<span id="final-score">0</span></h2>
+        <p>總耗時：<span id="final-time">00:00</span> | 總錯誤次數：<span id="final-mistakes" style="color:red">0</span></p>
+        
+        <div style="width:100%; overflow-x:auto;">
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>關卡</th>
+                        <th>原題目</th>
+                        <th>你的答案</th>
+                        <th>正確答案</th>
+                        <th>結果</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body"></tbody>
+            </table>
+        </div>
+        
+        <button onclick="location.reload()">再玩一次</button>
+    </div>
+
+</div>
+
+<script>
+    // --- 遊戲狀態變數 ---
+    let currentLevel = 1;
+    let questionsToPass = 0; // 該關卡需要答對的題數
+    let score = 0;
+    let combo = 0;
+    let mistakes = 0;
+    let timerInterval = null;
+    let totalSeconds = 0;
+    let historyData = [];
+    let currentQuestion = {};
+
+    // --- 數學輔助函數 ---
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    const lcm = (a, b) => (a * b) / gcd(a, b);
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // 生成一個已約簡的真分數 (分子, 分母)
+    function generateProperFraction(minD, maxD) {
+        let d, n;
+        do {
+            d = rand(minD, maxD);
+            n = rand(1, d - 1);
+        } while (gcd(n, d) !== 1);
+        return { n, d };
+    }
+
+    // 生成一個已約簡的假分數 (分子, 分母)
+    function generateImproperFraction(minD, maxD) {
+        let d, n;
+        do {
+            d = rand(minD, maxD);
+            n = rand(d + 1, d + 15);
+        } while (gcd(n, d) !== 1);
+        return { n, d };
+    }
+
+    // --- 題目生成器 ---
+    function generateQuestionData() {
+        let q = { type: currentLevel, f1: {}, f2: {}, ans1: {}, ans2: {} };
+        
+        if (currentLevel === 1) {
+            // 兩個真分數 (一位和兩位數分母)
+            let d1 = rand(2, 9);
+            let d2 = rand(10, 25);
+            // 隨機打亂位置
+            if (Math.random() > 0.5) [d1, d2] = [d2, d1];
+            
+            let frac1 = generateProperFraction(d1, d1);
+            let frac2 = generateProperFraction(d2, d2);
+            
+            q.f1 = { int: 0, n: frac1.n, d: frac1.d, isImproper: false };
+            q.f2 = { int: 0, n: frac2.n, d: frac2.d, isImproper: false };
+
+        } else if (currentLevel === 2) {
+            // 兩個帶分數
+            let sameInt = Math.random() > 0.5; // 50%機率整數相同
+            let int1 = rand(1, 5);
+            let int2 = sameInt ? int1 : rand(1, 5);
+            if(!sameInt && int1 === int2) int2++; // 確保不相同
+
+            let d1 = rand(3, 12);
+            let d2 = rand(3, 12);
+            while(d1 === d2) d2 = rand(3, 12);
+
+            let frac1 = generateProperFraction(d1, d1);
+            let frac2 = generateProperFraction(d2, d2);
+
+            q.f1 = { int: int1, n: frac1.n, d: frac1.d, isImproper: false };
+            q.f2 = { int: int2, n: frac2.n, d: frac2.d, isImproper: false };
+
+        } else if (currentLevel === 3) {
+            // 一個帶分數和一個假分數
+            let int1 = rand(1, 5);
+            let d1 = rand(2, 9);
+            let frac1 = generateProperFraction(d1, d1);
+
+            let d2 = rand(2, 9);
+            while(d1 === d2) d2 = rand(2, 9);
+            let frac2 = generateImproperFraction(d2, d2);
+
+            // 隨機打亂左/右邊的題型
+            if(Math.random() > 0.5) {
+                q.f1 = { int: int1, n: frac1.n, d: frac1.d, isImproper: false };
+                q.f2 = { int: 0, n: frac2.n, d: frac2.d, isImproper: true };
+            } else {
+                q.f1 = { int: 0, n: frac2.n, d: frac2.d, isImproper: true };
+                q.f2 = { int: int1, n: frac1.n, d: frac1.d, isImproper: false };
+            }
+        }
+
+        // 計算通分結果
+        let commonLcm = lcm(q.f1.d, q.f2.d);
+        
+        q.ans1 = {
+            int: q.f1.int, 
+            n: q.f1.n * (commonLcm / q.f1.d), 
+            d: commonLcm
+        };
+        q.ans2 = {
+            int: q.f2.int, 
+            n: q.f2.n * (commonLcm / q.f2.d), 
+            d: commonLcm
+        };
+
+        return q;
+    }
+
+    // --- UI 渲染輔助 ---
+    function formatFractionHTML(f) {
+        let html = '';
+        if (f.int > 0) {
+            html += `<div class="int-part">${f.int}</div>`;
+        }
+        html += `<div class="frac-part"><div class="num">${f.n}</div><div class="den">${f.d}</div></div>`;
+        return html;
+    }
+
+    function formatFractionString(f) {
+        if (f.int > 0) return `${f.int}又 ${f.n}/${f.d}`;
+        return `${f.n}/${f.d}`;
+    }
+
+    // --- 遊戲流程控制 ---
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function updateTimer() {
+        totalSeconds++;
+        let m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        let s = (totalSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('ui-time').textContent = `${m}:${s}`;
+    }
+
+    function updateStatsUI() {
+        document.getElementById('ui-level').textContent = currentLevel;
+        document.getElementById('ui-left').textContent = questionsToPass;
+        document.getElementById('ui-score').textContent = score;
+        document.getElementById('ui-combo').textContent = combo;
+        document.getElementById('ui-mistakes').textContent = mistakes;
+    }
+
+    function startGame() {
+        currentLevel = 1;
+        score = 0;
+        combo = 0;
+        mistakes = 0;
+        totalSeconds = 0;
+        historyData = [];
+        timerInterval = setInterval(updateTimer, 1000);
+        setupLevel();
+        switchScreen('screen-game');
+    }
+
+    function setupLevel() {
+        if(currentLevel === 1) {
+            questionsToPass = 7;
+            document.getElementById('level-title').textContent = "難度一：兩個真分數";
+        } else if (currentLevel === 2) {
+            questionsToPass = 5;
+            document.getElementById('level-title').textContent = "難度二：兩個帶分數";
+        } else if (currentLevel === 3) {
+            questionsToPass = 5;
+            document.getElementById('level-title').textContent = "難度三：帶分數與假分數";
+        }
+        loadNextQuestion();
+    }
+
+    function loadNextQuestion() {
+        updateStatsUI();
+        currentQuestion = generateQuestionData();
+        
+        // 渲染題目
+        document.getElementById('q-frac1').innerHTML = formatFractionHTML(currentQuestion.f1);
+        document.getElementById('q-frac2').innerHTML = formatFractionHTML(currentQuestion.f2);
+
+        // 重置輸入框
+        ['input-n1', 'input-d1', 'input-n2', 'input-d2'].forEach(id => {
+            document.getElementById(id).value = '';
+            document.getElementById(id).style.borderColor = '#ccc';
+        });
+
+        // 設置整數部分顯示（如果有）
+        let ansInt1 = document.getElementById('ans-int1');
+        if (currentQuestion.f1.int > 0) {
+            ansInt1.textContent = currentQuestion.f1.int;
+            ansInt1.style.display = 'block';
+        } else {
+            ansInt1.style.display = 'none';
+        }
+
+        let ansInt2 = document.getElementById('ans-int2');
+        if (currentQuestion.f2.int > 0) {
+            ansInt2.textContent = currentQuestion.f2.int;
+            ansInt2.style.display = 'block';
+        } else {
+            ansInt2.style.display = 'none';
+        }
+
+        document.getElementById('feedback-msg').textContent = '';
+    }
+
+    function checkAnswer() {
+        // 讀取玩家輸入
+        let n1 = parseInt(document.getElementById('input-n1').value);
+        let d1 = parseInt(document.getElementById('input-d1').value);
+        let n2 = parseInt(document.getElementById('input-n2').value);
+        let d2 = parseInt(document.getElementById('input-d2').value);
+
+        if (isNaN(n1) || isNaN(d1) || isNaN(n2) || isNaN(d2)) {
+            document.getElementById('feedback-msg').textContent = "⚠️ 請填滿所有空格！";
+            document.getElementById('feedback-msg').style.color = "orange";
+            return;
+        }
+
+        // 檢查答案是否與 L.C.M. 通分結果一致
+        let ans1Correct = (n1 === currentQuestion.ans1.n && d1 === currentQuestion.ans1.d);
+        let ans2Correct = (n2 === currentQuestion.ans2.n && d2 === currentQuestion.ans2.d);
+        let isCorrect = ans1Correct && ans2Correct;
+
+        // 記錄歷史
+        let qStr = `${formatFractionString(currentQuestion.f1)} 及 ${formatFractionString(currentQuestion.f2)}`;
+        
+        let uInput1 = { int: currentQuestion.ans1.int, n: n1, d: d1 };
+        let uInput2 = { int: currentQuestion.ans2.int, n: n2, d: d2 };
+        let uStr = `${formatFractionString(uInput1)} 及 ${formatFractionString(uInput2)}`;
+        let cStr = `${formatFractionString(currentQuestion.ans1)} 及 ${formatFractionString(currentQuestion.ans2)}`;
+
+        historyData.push({
+            level: currentLevel,
+            qStr: qStr,
+            uStr: uStr,
+            cStr: cStr,
+            isCorrect: isCorrect
+        });
+
+        if (isCorrect) {
+            score += 20;
+            if (combo > 0) score += 5; // 連擊獎勵
+            combo++;
+            questionsToPass--;
+            document.getElementById('feedback-msg').textContent = "✅ 答對了！";
+            document.getElementById('feedback-msg').style.color = "green";
+        } else {
+            combo = 0;
+            mistakes++;
+            questionsToPass++; // 懲罰：加一題
+            document.getElementById('feedback-msg').textContent = "❌ 答錯了！已增加額外一題。";
+            document.getElementById('feedback-msg').style.color = "red";
+            
+            // 提示錯誤框
+            if(!ans1Correct) {
+                document.getElementById('input-n1').style.borderColor = 'red';
+                document.getElementById('input-d1').style.borderColor = 'red';
+            }
+            if(!ans2Correct) {
+                document.getElementById('input-n2').style.borderColor = 'red';
+                document.getElementById('input-d2').style.borderColor = 'red';
+            }
+        }
+
+        updateStatsUI();
+
+        // 延遲後換題或換關
+        setTimeout(() => {
+            if (questionsToPass <= 0) {
+                endLevel();
+            } else {
+                loadNextQuestion();
+            }
+        }, 1500);
+    }
+
+    function endLevel() {
+        if (currentLevel < 3) {
+            document.getElementById('lvl-sum-score').textContent = score;
+            document.getElementById('lvl-sum-mistakes').textContent = mistakes;
+            switchScreen('screen-level-summary');
+        } else {
+            endGame();
+        }
+    }
+
+    function nextLevel() {
+        currentLevel++;
+        setupLevel();
+        switchScreen('screen-game');
+    }
+
+    function endGame() {
+        clearInterval(timerInterval);
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('final-mistakes').textContent = mistakes;
+        
+        let m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        let s = (totalSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('final-time').textContent = `${m}:${s}`;
+
+        // 建立表格
+        let tbody = document.getElementById('history-body');
+        tbody.innerHTML = '';
+        historyData.forEach(item => {
+            let row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.level}</td>
+                <td>${item.qStr}</td>
+                <td class="${item.isCorrect ? 'correct-text' : 'wrong-text'}">${item.uStr}</td>
+                <td>${item.cStr}</td>
+                <td class="${item.isCorrect ? 'correct-text' : 'wrong-text'}">${item.isCorrect ? '✔' : '✘'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        switchScreen('screen-final');
+    }
+</script>
+</body>
+</html>
